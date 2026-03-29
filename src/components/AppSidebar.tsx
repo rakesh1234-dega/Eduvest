@@ -30,7 +30,7 @@ export function AppSidebar() {
         <div className="h-8 w-8 rounded-xl gradient-primary flex items-center justify-center shadow-sm">
           <GraduationCap className="h-4 w-4 text-white" />
         </div>
-        <span className="font-bold text-lg gradient-text tracking-tight">BudgetBuddy</span>
+        <span className="font-bold text-lg gradient-text tracking-tight">EduVest</span>
       </div>
 
       {/* Nav */}
