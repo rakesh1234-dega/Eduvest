@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import type { Database } from "@/integrations/supabase/types";
 
 type TxType = Database["public"]["Enums"]["transaction_type"];

@@ -17,7 +17,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 const PIE_COLORS = ["#7c3aed", "#ec4899", "#f97316", "#06b6d4", "#22c55e", "#ef4444"];
 

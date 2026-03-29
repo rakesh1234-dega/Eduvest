@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/utils/auth";
 import { useCreateAccount } from "@/hooks/use-accounts";
 import { useUpsertBudget } from "@/hooks/use-budgets";
 import { useCreateCategory } from "@/hooks/use-categories";

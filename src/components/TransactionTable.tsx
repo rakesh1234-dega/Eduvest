@@ -41,7 +41,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useBulkDeleteTransactions, useDeleteTransaction } from "@/hooks/use-transactions";
 import type { Transaction } from "@/hooks/use-transactions";
 

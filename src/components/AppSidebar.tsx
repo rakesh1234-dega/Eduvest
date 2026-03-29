@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 const navItems = [
   { title: "Dashboard",        url: "/dashboard",         icon: LayoutDashboard },

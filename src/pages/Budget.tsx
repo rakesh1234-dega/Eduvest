@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, TrendingDown, Target, PiggyBank, Edit3, CheckCircle } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 export default function BudgetPage() {
   const { data: budget, isLoading } = useCurrentBudget();

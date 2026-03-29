@@ -5,7 +5,7 @@ import {
   Quote, Github, Twitter, Instagram, Target
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/utils/auth";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 
