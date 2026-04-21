@@ -214,7 +214,7 @@ export function TransactionTable({ transactions, isLoading, headerAction }: { tr
       </div>
 
       {/* Transactions Table */}
-      <div className="rounded-2xl border bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border bg-card overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/40 hover:bg-muted/40">

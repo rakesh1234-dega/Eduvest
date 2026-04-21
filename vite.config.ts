@@ -11,8 +11,20 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+      "/resend-proxy": {
+        target: "https://api.resend.com",
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/resend-proxy/, ""),
+        secure: true,
+      },
+    },
   },
-  plugins: [react(), ()].filter(Boolean),
+  plugins: [react()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/utils/auth";
 import { useCreateAccount } from "@/hooks/use-accounts";
 import { useUpsertBudget } from "@/hooks/use-budgets";
 import { useCreateCategory } from "@/hooks/use-categories";
-import { useUpdateProfile } from "@/hooks/use-profile";
+import { useUpdateProfile, useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { GraduationCap, Wallet, PiggyBank, Tag, ArrowRight, Check, Loader2 } from "lucide-react";
 import { format, startOfMonth } from "date-fns";
 import { toast } from "sonner";
+import { sendWelcomeEmail } from "@/lib/email/email-client";
+import { checkAndMarkEmail } from "@/lib/email/deduplication";
 
 const defaultCategories = [
   { name: "Food & Dining",   type: "expense" as const, color: "#f97316" },
@@ -42,6 +44,14 @@ export default function OnboardingPage() {
   const upsertBudget    = useUpsertBudget();
   const createCategory  = useCreateCategory();
   const updateProfile   = useUpdateProfile();
+  const { data: profile, isLoading: profileLoading } = useProfile();
+
+  // Guard: if already completed setup, skip to dashboard
+  useEffect(() => {
+    if (!profileLoading && profile?.onboarding_completed) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [profile, profileLoading, navigate]);
 
   const steps = [
     { title: "Welcome",    icon: GraduationCap },
@@ -87,7 +97,16 @@ export default function OnboardingPage() {
       // Mark onboarding complete
       await updateProfile.mutateAsync({ onboarding_completed: true });
 
-      toast.success("Setup complete! Welcome to BudgetBuddy 🎉");
+      // Send welcome email — once ever, non-blocking
+      if (user.email && checkAndMarkEmail(user.id, "welcome", "once_ever")) {
+        sendWelcomeEmail(user.email, {
+          userName: user.name || user.email.split("@")[0],
+        }).catch(() => {
+          // Email failure must never block onboarding
+        });
+      }
+
+      toast.success("Setup complete! Welcome to EduVest 🎉");
       navigate("/dashboard");
     } catch (err: any) {
       console.error(err);

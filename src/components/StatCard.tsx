@@ -18,7 +18,7 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div className={cn(
-      "rounded-2xl p-5 bg-white border border-border card-hover",
+      "rounded-2xl p-5 bg-card border border-border card-hover",
       accent && "gradient-primary text-white border-0 shadow-lg",
       className
     )}>

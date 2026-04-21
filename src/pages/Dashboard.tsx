@@ -6,11 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 import { StatCard } from "@/components/StatCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LevelProgress } from "@/components/Gamification/LevelProgress";
+import { ScheduleDashboardCard } from "@/components/Schedule/ScheduleDashboardCard";
+import { generateMonthlyPDF } from "@/utils/pdfGenerator";
+import { Button } from "@/components/ui/button";
 import {
   Wallet, Banknote, Smartphone, CreditCard,
   TrendingUp, TrendingDown, PiggyBank,
   ArrowUpRight, ArrowDownRight, ArrowLeftRight,
-  AlertTriangle, MoreHorizontal,
+  AlertTriangle, MoreHorizontal, Download,
 } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import {
@@ -19,18 +23,26 @@ import {
 } from "recharts";
 import { cn } from "@/utils/utils";
 
-const PIE_COLORS = ["#7c3aed", "#ec4899", "#f97316", "#06b6d4", "#22c55e", "#ef4444"];
+const PIE_COLORS = ["#6366f1", "#ec4899", "#f59e0b", "#10b981", "#8b5cf6", "#f43f5e"];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white rounded-xl shadow-lg border border-border p-3 text-xs">
-        <p className="font-semibold text-foreground mb-1">{label}</p>
-        {payload.map((p: any) => (
-          <p key={p.dataKey} style={{ color: p.color }} className="font-medium">
-            {p.dataKey === "income" ? "Income" : "Expense"}: ₹{Number(p.value).toLocaleString()}
-          </p>
-        ))}
+      <div className="bg-card rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border p-4 min-w-[150px]">
+        {label && <p className="font-bold text-slate-700 mb-2">{label}</p>}
+        <div className="space-y-2">
+          {payload.map((p: any) => (
+            <div key={p.dataKey || p.name} className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <span className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: p.color || p.payload?.fill }}></span>
+                {p.name || (p.dataKey === "income" ? "Income" : p.dataKey === "expense" ? "Expense" : p.dataKey)}
+              </span>
+              <span className="text-sm font-bold text-foreground">
+                ₹{Number(p.value).toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -108,8 +120,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      
+      {/* ── Top Actions ── */}
+      <div className="flex justify-end mb-2">
+        {/* PDF Export Button */}
+        <Button 
+          className="bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-sm"
+          onClick={() => generateMonthlyPDF(profile, transactions, accounts, budget)}
+          disabled={!transactions || transactions.length === 0}
+        >
+          <Download className="h-4 w-4 mr-2" /> Download Monthly PDF
+        </Button>
+      </div>
 
-      {/* ── Row 1: Stat cards ── */}
+      {/* ── Main Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Balance"
@@ -145,6 +169,9 @@ export default function DashboardPage() {
         />
       </div>
 
+      {/* ── Today Schedule ── */}
+      <ScheduleDashboardCard />
+
       {/* ── Row 2: Account mini cards ── */}
       <div className="grid grid-cols-3 gap-4">
         {[
@@ -152,7 +179,7 @@ export default function DashboardPage() {
           { label: "UPI",        value: stats?.upiBalance || 0,  icon: Smartphone, bg: "icon-bg-blue",   color: "text-blue-700"   },
           { label: "Card",       value: stats?.cardBalance || 0, icon: CreditCard, bg: "icon-bg-purple",  color: "text-violet-700" },
         ].map(({ label, value, icon: Icon, bg, color }) => (
-          <div key={label} className="bg-white rounded-2xl border border-border p-4 card-hover flex items-center gap-4">
+          <div key={label} className="bg-card rounded-2xl border border-border p-4 card-hover flex items-center gap-4">
             <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", bg)}>
               <Icon className={cn("h-5 w-5", color)} />
             </div>
@@ -168,44 +195,61 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Cash Flow Area chart — spans 2 cols */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-border p-5 card-hover">
-          <div className="flex items-center justify-between mb-4">
+        <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-semibold text-foreground">Cash Flow</h3>
-              <p className="text-xs text-muted-foreground">Income vs Expenses</p>
+              <h3 className="font-bold text-lg text-foreground">Cash Flow</h3>
+              <p className="text-sm text-muted-foreground font-medium">Income vs Expenses (Last 7 months)</p>
             </div>
-            <span className="text-xs bg-accent text-accent-foreground font-medium px-2.5 py-1 rounded-lg">Monthly</span>
+            <span className="text-xs bg-muted text-muted-foreground font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">Monthly</span>
           </div>
-          <ResponsiveContainer width="100%" height={210}>
-            <AreaChart data={stats?.chartData || []} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}    />
-                </linearGradient>
-                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#ec4899" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#ec4899" stopOpacity={0}    />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="income"  stroke="#7c3aed" strokeWidth={2} fill="url(#colorIncome)"  dot={false} />
-              <Area type="monotone" dataKey="expense" stroke="#ec4899" strokeWidth={2} fill="url(#colorExpense)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-          <div className="flex items-center gap-4 mt-2">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2 w-2 rounded-full bg-violet-600 inline-block" />Income</span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="h-2 w-2 rounded-full bg-pink-500 inline-block" />Expense</span>
-          </div>
+          {stats?.chartData && stats.chartData.some((d: any) => d.income > 0 || d.expense > 0) ? (
+            <>
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                    <Area type="monotone" name="Income" dataKey="income" stroke="#10b981" strokeWidth={3} fill="url(#colorIncome)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }} />
+                    <Area type="monotone" name="Expense" dataKey="expense" stroke="#f43f5e" strokeWidth={3} fill="url(#colorExpense)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#f43f5e" }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex items-center gap-6 mt-4 justify-center">
+                <span className="flex items-center gap-2 text-sm font-semibold text-muted-foreground"><span className="h-3 w-3 rounded-full bg-emerald-500 shadow-sm" />Income</span>
+                <span className="flex items-center gap-2 text-sm font-semibold text-muted-foreground"><span className="h-3 w-3 rounded-full bg-rose-500 shadow-sm" />Expense</span>
+              </div>
+            </>
+          ) : (
+            <div className="h-[260px] flex flex-col items-center justify-center text-slate-400">
+              <TrendingUp className="h-8 w-8 mb-2 opacity-30" />
+              <p className="text-sm font-medium text-muted-foreground">No cash flow data available.</p>
+              <p className="text-xs mt-1">Add your first transaction to see the trend.</p>
+            </div>
+          )}
         </div>
 
-        {/* Budget & Category stacked */}
+        {/* Gamification, Budget & Category stacked */}
         <div className="flex flex-col gap-4">
+          {/* Level Progress */}
+          {profile && (
+            <LevelProgress level={profile.level || 1} points={profile.points || 0} className="w-full" />
+          )}
+
           {/* Budget card */}
-          <div className="bg-white rounded-2xl border border-border p-5 card-hover">
+          <div className="bg-card rounded-2xl border border-border p-5 card-hover">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-sm text-foreground">Budget</h3>
               <button className="text-xs text-primary hover:underline font-medium">See All ↗</button>
@@ -247,41 +291,58 @@ export default function DashboardPage() {
           </div>
 
           {/* Category donut */}
-          <div className="bg-white rounded-2xl border border-border p-5 card-hover flex-1">
-            <h3 className="font-semibold text-sm text-foreground mb-3">Spending by Category</h3>
+          <div className="bg-card rounded-2xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow flex-1">
+            <h3 className="font-bold text-lg text-foreground mb-4">Spending Breakdown</h3>
             {stats?.categoryData && stats.categoryData.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={120}>
-                  <PieChart>
-                    <Pie data={stats.categoryData} dataKey="value" cx="50%" cy="50%" innerRadius={35} outerRadius={55}>
-                      {stats.categoryData.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: any) => `₹${Number(v).toLocaleString()}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="space-y-1 mt-1">
+                <div className="relative h-48 w-full mb-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={stats.categoryData} 
+                        dataKey="value" 
+                        nameKey="name"
+                        cx="50%" cy="50%" 
+                        innerRadius={55} 
+                        outerRadius={75}
+                        paddingAngle={3}
+                        stroke="none"
+                      >
+                        {stats.categoryData.map((_, i) => (
+                          <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+                    <span className="text-xl font-extrabold text-foreground mt-0.5">
+                      ₹{stats.monthExpense.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2.5">
                   {stats.categoryData.slice(0, 3).map((d, i) => (
-                    <div key={d.name} className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                        <span className="text-muted-foreground truncate max-w-[80px]">{d.name}</span>
+                    <div key={d.name} className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2.5">
+                        <span className="h-3 w-3 rounded-full shadow-sm" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                        <span className="text-muted-foreground font-medium truncate max-w-[120px]">{d.name}</span>
                       </span>
-                      <span className="font-medium">₹{d.value.toLocaleString()}</span>
+                      <span className="font-bold text-foreground">₹{d.value.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
               </>
             ) : (
-              <p className="text-xs text-muted-foreground text-center py-8">No expense data this month.</p>
+              <div className="h-48 flex items-center justify-center text-slate-400 text-sm font-medium">No expense data this month.</div>
             )}
           </div>
         </div>
       </div>
 
       {/* ── Row 4: Recent Transactions ── */}
-      <div className="bg-white rounded-2xl border border-border p-5 card-hover">
+      <div className="bg-card rounded-2xl border border-border p-5 card-hover">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-foreground">Recent Transactions</h3>
           <button

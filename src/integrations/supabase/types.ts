@@ -113,13 +113,93 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          message: string
+          type: string
+          is_read: boolean
+          link: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          message: string
+          type?: string
+          is_read?: boolean
+          link?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          message?: string
+          type?: string
+          is_read?: boolean
+          link?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          id: string
+          sender_id: string | null
+          recipient_id: string | null
+          subject: string
+          body: string
+          is_read: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sender_id?: string | null
+          recipient_id?: string | null
+          subject: string
+          body: string
+          is_read?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          sender_id?: string | null
+          recipient_id?: string | null
+          subject?: string
+          body?: string
+          is_read?: boolean | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
           onboarding_completed: boolean
+          role: string | null
           updated_at: string
           user_id: string
         }
@@ -127,8 +207,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           onboarding_completed?: boolean
+          role?: string | null
           updated_at?: string
           user_id: string
         }
@@ -136,10 +218,33 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           onboarding_completed?: boolean
+          role?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      schedules: {
+        Row: {
+          id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
         }
         Relationships: []
       }

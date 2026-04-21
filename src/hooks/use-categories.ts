@@ -11,7 +11,11 @@ export function useCategories() {
   return useQuery({
     queryKey: ["categories", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("categories").select("*").order("name");
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("user_id", user.id) // 🔒 Enforce identity isolation
+        .order("name");
       if (error) throw error;
       return data as Category[];
     },

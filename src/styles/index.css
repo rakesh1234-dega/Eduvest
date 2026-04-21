@@ -195,4 +195,21 @@
   .glow-border {
     box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2), 0 4px 16px hsl(var(--primary) / 0.08);
   }
+
+  /* Custom Animations */
+  .animate-bounce-slow {
+    animation: bounce-slow 3s infinite;
+  }
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+    50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+  }
+
+  .animate-progress-indeterminate {
+    animation: progress-indeterminate 1.5s infinite linear;
+  }
+  @keyframes progress-indeterminate {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
 }

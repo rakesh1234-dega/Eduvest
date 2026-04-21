@@ -63,6 +63,8 @@ export function useUpdateProfile() {
     mutationFn: async (updates: {
       onboarding_completed?: boolean;
       display_name?: string;
+      points?: number;
+      level?: number;
     }) => {
       if (!user) throw new Error("Not authenticated");
 
@@ -78,6 +80,46 @@ export function useUpdateProfile() {
 
       if (error) throw error;
       return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
+  });
+}
+
+export function useAddPoints() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ points, activityName }: { points: number; activityName: string }) => {
+      if (!user) throw new Error("Not authenticated");
+
+      // Fetch current points
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("points, level")
+        .eq("user_id", user.id)
+        .single();
+      
+      const newPoints = (profile?.points || 0) + points;
+      const newLevel = Math.floor(newPoints / 100) + 1;
+
+      // Update profile
+      await supabase
+        .from("profiles")
+        .update({ points: newPoints, level: newLevel })
+        .eq("user_id", user.id);
+
+      // Log activity
+      await supabase
+        .from("activity_logs")
+        .insert({
+          user_id: user.id,
+          activity_type: activityName,
+          points_awarded: points,
+        })
+        .select();
+
+      return newPoints;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
   });

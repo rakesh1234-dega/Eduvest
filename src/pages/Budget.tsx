@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, TrendingDown, Target, PiggyBank, Edit3, CheckCircle } from "lucide-react";
+import { AlertTriangle, TrendingDown, Target, PiggyBank, Edit3, CheckCircle, Lightbulb, Info, ShieldCheck } from "lucide-react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/utils/utils";
+import { generateMonthlyReview, BudgetReviewInsight } from "@/utils/budget-engine";
 
 export default function BudgetPage() {
   const { data: budget, isLoading } = useCurrentBudget();
@@ -63,7 +64,7 @@ export default function BudgetPage() {
 
       {/* Main budget card */}
       {budget ? (
-        <div className="bg-white rounded-2xl border border-border p-6 card-hover">
+        <div className="bg-card rounded-2xl border border-border p-6 card-hover">
           <div className="flex items-start justify-between mb-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Monthly Budget</p>
@@ -129,7 +130,7 @@ export default function BudgetPage() {
 
       {/* Savings progress card */}
       {budget && budget.savings_goal > 0 && (
-        <div className="bg-white rounded-2xl border border-border p-5 card-hover">
+        <div className="bg-card rounded-2xl border border-border p-5 card-hover">
           <div className="flex items-center gap-3 mb-4">
             <div className="h-9 w-9 rounded-xl bg-violet-50 flex items-center justify-center">
               <PiggyBank className="h-5 w-5 text-violet-600" />
@@ -167,7 +168,7 @@ export default function BudgetPage() {
 
       {/* Set / Edit budget form */}
       {(!budget || editing) && (
-        <div className="bg-white rounded-2xl border border-border p-6">
+        <div className="bg-card rounded-2xl border border-border p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center">
               <PiggyBank className="h-5 w-5 text-white" />
@@ -213,6 +214,46 @@ export default function BudgetPage() {
             {editing && (
               <Button variant="outline" className="rounded-xl" onClick={() => setEditing(false)}>Cancel</Button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Monthly Review & Insights */}
+      {budget && transactions && transactions.length > 0 && (
+        <div className="bg-card rounded-2xl border border-border p-6 card-hover">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="h-9 w-9 rounded-xl bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center">
+              <Lightbulb className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Monthly Review & Insights</h3>
+              <p className="text-xs text-muted-foreground">Smart suggestions based on your spending patterns</p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {generateMonthlyReview(budget.amount, monthExpense, budget.savings_goal || 0, transactions).map((insight: BudgetReviewInsight, idx: number) => {
+              const iconMap = {
+                warning: <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />,
+                success: <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />,
+                info:    <Info className="h-4 w-4 text-sky-500 shrink-0 mt-0.5" />,
+              };
+              const bgMap = {
+                warning: "bg-amber-50/80 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800",
+                success: "bg-emerald-50/80 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800",
+                info:    "bg-sky-50/80 border-sky-200 dark:bg-sky-900/20 dark:border-sky-800",
+              };
+
+              return (
+                <div key={idx} className={cn("flex gap-3 p-4 rounded-xl border", bgMap[insight.type])}>
+                  {iconMap[insight.type]}
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{insight.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{insight.message}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

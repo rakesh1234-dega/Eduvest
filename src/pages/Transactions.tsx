@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTransactions, useCreateTransaction, useDeleteTransaction } from "@/hooks/use-transactions";
 import { useAccounts } from "@/hooks/use-accounts";
 import { useCategories } from "@/hooks/use-categories";
+import { useProfile, useAddPoints } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +42,8 @@ export default function TransactionsPage() {
   const { data: transactions, isLoading } = useTransactions();
   const { data: accounts } = useAccounts();
   const { data: categories } = useCategories();
+  const { data: profile } = useProfile();
+  const addPoints = useAddPoints();
   const createTx = useCreateTransaction();
   const deleteTx = useDeleteTransaction();
 
@@ -57,6 +60,30 @@ export default function TransactionsPage() {
       category_id: categoryId || undefined,
     });
     setOpen(false); setAmount(""); setDescription(""); setCategoryId("");
+    
+    // Gamification Celebration
+    import("canvas-confetti").then((module) => {
+      const confetti = module.default;
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#4f46e5', '#8b5cf6', '#ec4899', '#f59e0b']
+      });
+    });
+
+    // Award 10 points via Supabase hook + activity log
+    try {
+      await addPoints.mutateAsync({ points: 10, activityName: "transaction_created" });
+      toast.success(
+        <div className="flex flex-col gap-1">
+          <span className="font-bold">Transaction Added!</span>
+          <span className="text-emerald-600 font-bold text-xs flex items-center gap-1">⭐ +10 Points Earned</span>
+        </div>
+      );
+    } catch {
+      toast.success("Transaction Added!");
+    }
   };
 
   // Quick stats
@@ -74,7 +101,7 @@ export default function TransactionsPage() {
 
       {/* Quick stats row */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-4 card-hover">
+        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4 card-hover">
           <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
             <TrendingUp className="h-5 w-5 text-emerald-600" />
           </div>
@@ -83,7 +110,7 @@ export default function TransactionsPage() {
             <p className="text-xl font-bold text-emerald-600">+₹{totalIncome.toLocaleString()}</p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-border p-4 flex items-center gap-4 card-hover">
+        <div className="bg-card rounded-2xl border border-border p-4 flex items-center gap-4 card-hover">
           <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
             <TrendingDown className="h-5 w-5 text-rose-500" />
           </div>

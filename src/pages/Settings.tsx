@@ -3,7 +3,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Shield, Mail, LogOut, Save, Lock } from "lucide-react";
+import { User, Shield, ShieldAlert, Mail, LogOut, Save, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -25,10 +25,10 @@ export default function SettingsPage() {
   const initials = (displayName || user?.email || "U").charAt(0).toUpperCase();
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <div className="space-y-5 max-w-2xl mx-auto">
 
       {/* Profile header card */}
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-card rounded-2xl border border-border p-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="h-16 w-16 rounded-2xl gradient-primary flex items-center justify-center text-white text-2xl font-bold shadow-md">
             {initials}
@@ -36,7 +36,7 @@ export default function SettingsPage() {
           <div>
             <h2 className="text-lg font-bold text-foreground">{displayName || "Your Name"}</h2>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
-            <span className="inline-block mt-1 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-md">
+            <span className="inline-block mt-1 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold px-2 py-0.5 rounded-md dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800">
               ✓ Verified Student
             </span>
           </div>
@@ -82,7 +82,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Security card */}
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-card rounded-2xl border border-border p-6">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
           <Shield className="h-4 w-4 text-primary" /> Security & Privacy
         </h3>
@@ -90,10 +90,11 @@ export default function SettingsPage() {
           {[
             { icon: Lock,   label: "Row-level Security", desc: "Your data is only accessible by you through Supabase RLS policies." },
             { icon: Shield, label: "Encrypted Storage",  desc: "All sensitive financial data is encrypted at rest and in transit."  },
+            { icon: Mail,   label: "Email Security",     desc: "Email notifications are sent via secure Edge Functions — your API key is never exposed."  },
           ].map(({ icon: Icon, label, desc }) => (
             <div key={label} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border">
-              <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <Icon className="h-4 w-4 text-emerald-600" />
+              <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+                <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">{label}</p>
@@ -109,7 +110,7 @@ export default function SettingsPage() {
           <p className="text-sm text-muted-foreground mb-3">Signing out will end your current session on this device.</p>
           <Button
             variant="outline"
-            className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-xl gap-2"
+            className="border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 rounded-xl gap-2 dark:border-rose-800 dark:hover:bg-rose-900/30"
             onClick={signOut}
           >
             <LogOut className="h-4 w-4" />

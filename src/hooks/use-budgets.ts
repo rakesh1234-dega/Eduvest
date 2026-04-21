@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/utils/auth";
 import { toast } from "sonner";
 import { format, startOfMonth } from "date-fns";
+import { notificationService } from "@/lib/notifications/notification-service";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type Budget = Tables<"budgets">;
@@ -16,6 +17,7 @@ export function useCurrentBudget() {
       const { data, error } = await supabase
         .from("budgets")
         .select("*")
+        .eq("user_id", user.id) // 🔒 Enforce identity isolation
         .eq("month", currentMonth)
         .maybeSingle();
       if (error) throw error;
@@ -36,10 +38,25 @@ export function useUpsertBudget() {
         { onConflict: "user_id,month" }
       ).select().single();
       if (error) throw error;
+
+      // Create notification
+      try {
+        await notificationService.createNotification({
+          title: "Budget Updated",
+          message: `Your budget for ${budget.month} was updated to ₹${budget.amount.toLocaleString()}.`,
+          type: "info",
+          user_id: user.id,
+        });
+      } catch (err) {
+        console.error("Failed to create notification", err);
+      }
+
       return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["budget"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["unreadNotifications"] });
       toast.success("Budget saved!");
     },
     onError: (e: any) => toast.error(e.message),
