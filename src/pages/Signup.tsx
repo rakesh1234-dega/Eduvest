@@ -7,7 +7,7 @@ export default function SignupPage() {
         routing="path"
         path="/signup"
         signInUrl="/login"
-        afterSignUpUrl="/onboarding"
+        fallbackRedirectUrl="/onboarding"
         appearance={{
           elements: {
             card: "rounded-2xl shadow-lg",

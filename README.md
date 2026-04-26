@@ -45,6 +45,16 @@ npm run dev
 ## 🔒 Security Notice
 The `.env` file is excluded from version control (Git) to protect sensitive API keys. When inviting collaborators, ensure they are provided with these keys securely.
 
+## 🌐 Deployment (Vercel / Netlify)
+When deploying this application to platforms like Vercel or Netlify, you must configure the environment variables in their respective dashboards:
+
+1. **Do not upload your `.env` file**.
+2. In your Vercel/Netlify project settings, enter your environment variables.
+3. For Clerk authentication, **ensure you use production keys**. Development keys (`pk_test_`) will cause the production build to fail starting.
+   - `VITE_CLERK_PUBLISHABLE_KEY=pk_live_your_live_key_here`
+   - `VITE_SUPABASE_URL=...`
+   - `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=...`
+
 ## 🤝 Collaboration
 This is a private repository. If you are a collaborator:
 1. Ensure you have Git access.

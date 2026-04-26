@@ -7,7 +7,7 @@ export default function LoginPage() {
         routing="path"
         path="/login"
         signUpUrl="/signup"
-        afterSignInUrl="/dashboard"
+        fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
             card: "rounded-2xl shadow-lg",
