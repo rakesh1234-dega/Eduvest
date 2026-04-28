@@ -25,10 +25,10 @@ function validateConfig() {
   if (!isSupabaseConfigured) {
     return {
       valid: false,
-      type: "supabase" as const,
-      message: "Missing Supabase configuration. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY are set correctly."
+      message: "Missing Supabase configuration. Ensure VITE_SUPABASE_URL and either VITE_SUPABASE_ANON_KEY or VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY are set correctly in your Vercel Dashboard."
     };
   }
+
 
   return { valid: true };
 }
