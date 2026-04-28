@@ -145,7 +145,7 @@ export default function OnboardingPage() {
               <div className="h-20 w-20 rounded-3xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
                 <GraduationCap className="h-10 w-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold">Welcome to BudgetBuddy!</h2>
+              <h2 className="text-2xl font-bold">Welcome to EduVest!</h2>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Let's set up your personal finance tracker in under a minute.
               </p>
