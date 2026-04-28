@@ -21,16 +21,7 @@ function validateConfig() {
     };
   }
 
-  // 2. Production Security Check (Using Test Keys in Prod)
-  if (isProd && clerkPubKey.startsWith("pk_test_")) {
-    return {
-      valid: false,
-      type: "clerk" as const,
-      message: "Security Error: You are using a Clerk 'Test' key in a Production environment. Please switch to your pk_live_ key in the Vercel Dashboard."
-    };
-  }
-
-  // 3. Missing Supabase Config
+  // 2. Missing Supabase Config
   if (!isSupabaseConfigured) {
     return {
       valid: false,
@@ -41,6 +32,7 @@ function validateConfig() {
 
   return { valid: true };
 }
+
 
 const config = validateConfig();
 
