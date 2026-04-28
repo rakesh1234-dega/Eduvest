@@ -3,37 +3,64 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App.tsx";
 import "./styles/index.css";
 
+import { isSupabaseConfigured } from "@/integrations/supabase/client";
+import { ConfigError } from "@/components/ConfigError";
+
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const isProd = import.meta.env.PROD;
 
-if (!clerkPubKey) {
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY in .env");
+// ─── Configuration Validation Logic ───
+
+function validateConfig() {
+  // 1. Missing Clerk Key
+  if (!clerkPubKey) {
+    return {
+      valid: false,
+      type: "clerk" as const,
+      message: "Missing VITE_CLERK_PUBLISHABLE_KEY. Please add it to your Vercel Environment Variables."
+    };
+  }
+
+  // 2. Production Security Check (Using Test Keys in Prod)
+  if (isProd && clerkPubKey.startsWith("pk_test_")) {
+    return {
+      valid: false,
+      type: "clerk" as const,
+      message: "Security Error: You are using a Clerk 'Test' key in a Production environment. Please switch to your pk_live_ key in the Vercel Dashboard."
+    };
+  }
+
+  // 3. Missing Supabase Config
+  if (!isSupabaseConfigured) {
+    return {
+      valid: false,
+      type: "supabase" as const,
+      message: "Missing Supabase configuration. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY are set correctly."
+    };
+  }
+
+  return { valid: true };
 }
 
-// ─── Clerk Environment Safety Checks ───
-// Detect if the app is accidentally exposing Secret Keys
-if (import.meta.env.VITE_CLERK_SECRET_KEY || clerkPubKey.startsWith("sk_")) {
-  throw new Error("SECURITY FATAL: Never expose your Clerk Secret Key (sk_test_ / sk_live_) to the frontend via VITE_ variables!");
-}
+const config = validateConfig();
 
-// Ensure development keys aren't used in production
-if (isProd && clerkPubKey.startsWith("pk_test_")) {
-  throw new Error(
-    "SECURITY ERROR: You are using a Clerk development key (pk_test_) in a Production build. " +
-    "Please switch to your production keys (pk_live_) in your deployment environment variables."
+// ─── Render Application ───
+
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
+
+if (!config.valid) {
+  createRoot(rootElement).render(
+    <ConfigError 
+      errorType={config.type as any} 
+      message={config.message as string} 
+    />
+  );
+} else {
+  createRoot(rootElement).render(
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <App />
+    </ClerkProvider>
   );
 }
 
-// Warn if production keys are used in local development
-if (!isProd && clerkPubKey.startsWith("pk_live_")) {
-  console.warn(
-    "WARNING: You are using a Clerk production key (pk_live_) in a local development environment. " +
-    "It is highly recommended to use development keys (pk_test_) locally to avoid polluting live user data."
-  );
-}
-
-createRoot(document.getElementById("root")!).render(
-  <ClerkProvider publishableKey={clerkPubKey}>
-    <App />
-  </ClerkProvider>
-);
