@@ -55,18 +55,18 @@ export default function AnalyticsPage() {
     for (let i = 5; i >= 0; i--) {
       const d = subMonths(now, i);
       const start = format(startOfMonth(d), "yyyy-MM-dd");
-      const end   = format(endOfMonth(d),   "yyyy-MM-dd");
+      const end = format(endOfMonth(d), "yyyy-MM-dd");
       const slice = transactions.filter((t: any) => t.date >= start && t.date <= end);
       monthlyData.push({
-        month:   format(d, "MMM"),
-        Income:  slice.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0),
+        month: format(d, "MMM"),
+        Income: slice.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0),
         Expense: slice.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0),
       });
     }
 
     // Category breakdown (current month)
     const start = format(startOfMonth(now), "yyyy-MM-dd");
-    const end   = format(endOfMonth(now),   "yyyy-MM-dd");
+    const end = format(endOfMonth(now), "yyyy-MM-dd");
     const monthExpTx = transactions.filter((t: any) => t.type === "expense" && t.date >= start && t.date <= end);
     const catMap: Record<string, number> = {};
     monthExpTx.forEach((t: any) => {
@@ -78,14 +78,14 @@ export default function AnalyticsPage() {
       .map(([name, value]) => ({ name, value }));
 
     const accountData = accounts.map((a) => ({
-      name:    `${a.name}`,
+      name: `${a.name}`,
       Balance: a.balance,
-      type:    a.type,
+      type: a.type,
     }));
 
-    const totalIncome  = transactions.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0);
+    const totalIncome = transactions.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0);
     const totalExpense = transactions.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0);
-    const netSavings   = totalIncome - totalExpense;
+    const netSavings = totalIncome - totalExpense;
 
     return { monthlyData, categoryData, accountData, totalIncome, totalExpense, netSavings };
   }, [transactions, accounts]);
@@ -100,15 +100,15 @@ export default function AnalyticsPage() {
   }
 
   const statCards = [
-    { label: "Total Income",   value: `₹${(analytics?.totalIncome  || 0).toLocaleString()}`, icon: TrendingUp,  bg: "bg-emerald-50", color: "text-emerald-600", valueColor: "text-emerald-600" },
-    { label: "Total Expenses", value: `₹${(analytics?.totalExpense || 0).toLocaleString()}`, icon: TrendingDown, bg: "bg-rose-50",    color: "text-rose-500",    valueColor: "text-rose-500"    },
-    { label: "Net Savings",    value: `₹${(analytics?.netSavings   || 0).toLocaleString()}`, icon: Wallet,       bg: "bg-violet-50",  color: "text-violet-600",  valueColor: "text-foreground"  },
+    { label: "Total Income", value: `₹${(analytics?.totalIncome || 0).toLocaleString()}`, icon: TrendingUp, bg: "bg-emerald-50", color: "text-emerald-600", valueColor: "text-emerald-600" },
+    { label: "Total Expenses", value: `₹${(analytics?.totalExpense || 0).toLocaleString()}`, icon: TrendingDown, bg: "bg-rose-50", color: "text-rose-500", valueColor: "text-rose-500" },
+    { label: "Net Savings", value: `₹${(analytics?.netSavings || 0).toLocaleString()}`, icon: Wallet, bg: "bg-violet-50", color: "text-violet-600", valueColor: "text-foreground" },
   ];
 
   return (
     <div className="space-y-5">
       <div className="flex justify-end">
-        <Button 
+        <Button
           onClick={() => generateMonthlyPDF(profile, transactions || [], accounts || [], budget)}
           className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
         >
@@ -157,7 +157,7 @@ export default function AnalyticsPage() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
-                  <YAxis tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                  <YAxis tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
                   <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} />
                   <Area type="monotone" name="Income" dataKey="Income" stroke="#10b981" strokeWidth={3} fill="url(#aIncome)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }} />
                   <Area type="monotone" name="Expense" dataKey="Expense" stroke="#f43f5e" strokeWidth={3} fill="url(#aExpense)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#f43f5e" }} />
@@ -190,12 +190,12 @@ export default function AnalyticsPage() {
               <div className="relative h-[250px] w-full mb-6 mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie 
-                      data={analytics.categoryData} 
-                      dataKey="value" 
+                    <Pie
+                      data={analytics.categoryData}
+                      dataKey="value"
                       nameKey="name"
-                      cx="50%" cy="50%" 
-                      innerRadius={70} 
+                      cx="50%" cy="50%"
+                      innerRadius={70}
                       outerRadius={95}
                       paddingAngle={3}
                       stroke="none"
@@ -210,14 +210,14 @@ export default function AnalyticsPage() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total</span>
                   <span className="text-2xl font-extrabold text-foreground mt-1">
-                    ₹{analytics.categoryData.reduce((s:number, x:any) => s + x.value, 0).toLocaleString()}
+                    ₹{analytics.categoryData.reduce((s: number, x: any) => s + x.value, 0).toLocaleString()}
                   </span>
                 </div>
               </div>
               <div className="space-y-3">
                 {analytics.categoryData.map((d, i) => {
-                  const total = analytics.categoryData.reduce((s:number, x:any) => s + x.value, 0);
-                  const pct   = total ? Math.round((d.value / total) * 100) : 0;
+                  const total = analytics.categoryData.reduce((s: number, x: any) => s + x.value, 0);
+                  const pct = total ? Math.round((d.value / total) * 100) : 0;
                   return (
                     <div key={d.name} className="flex items-center gap-3">
                       <span className="h-3 w-3 rounded-full shadow-sm shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.accountData} layout="vertical" margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
                   <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 13, fill: "#475569", fontWeight: 600 }} axisLine={false} tickLine={false} />
                   <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomTooltip />} />
                   <Bar dataKey="Balance" name="Balance" fill="#3b82f6" radius={[0, 6, 6, 0]} barSize={32}>

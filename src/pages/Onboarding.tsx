@@ -16,34 +16,32 @@ import { sendWelcomeEmail } from "@/lib/email/email-client";
 import { checkAndMarkEmail } from "@/lib/email/deduplication";
 
 const defaultCategories = [
-  { name: "Food & Dining",   type: "expense" as const, color: "#f97316" },
-  { name: "Transport",       type: "expense" as const, color: "#3b82f6" },
-  { name: "Shopping",        type: "expense" as const, color: "#ec4899" },
-  { name: "Education",       type: "expense" as const, color: "#8b5cf6" },
-  { name: "Entertainment",   type: "expense" as const, color: "#06b6d4" },
-  { name: "Rent & Bills",    type: "expense" as const, color: "#ef4444" },
-  { name: "Salary",          type: "income"  as const, color: "#22c55e" },
-  { name: "Pocket Money",    type: "income"  as const, color: "#10b981" },
-  { name: "Freelance",       type: "income"  as const, color: "#6366f1" },
+  { name: "Food & Dining", type: "expense" as const, color: "#f97316" },
+  { name: "Transport", type: "expense" as const, color: "#3b82f6" },
+  { name: "Shopping", type: "expense" as const, color: "#ec4899" },
+  { name: "Education", type: "expense" as const, color: "#8b5cf6" },
+  { name: "Entertainment", type: "expense" as const, color: "#06b6d4" },
+  { name: "Rent & Bills", type: "expense" as const, color: "#ef4444" },
+  { name: "Salary", type: "income" as const, color: "#22c55e" },
+  { name: "Pocket Money", type: "income" as const, color: "#10b981" },
+  { name: "Freelance", type: "income" as const, color: "#6366f1" },
 ];
 
 export default function OnboardingPage() {
-  const [step, setStep]                         = useState(0);
-  const [cashBalance, setCashBalance]           = useState("");
-  const [upiBalance, setUpiBalance]             = useState("");
-  const [cardBalance, setCardBalance]           = useState("");
-  const [monthlyBudget, setMonthlyBudget]       = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    defaultCategories.map((c) => c.name)
-  );
+  const [step, setStep] = useState(0);
+  const [cashBalance, setCashBalance] = useState("");
+  const [upiBalance, setUpiBalance] = useState("");
+  const [cardBalance, setCardBalance] = useState("");
+  const [monthlyBudget, setMonthlyBudget] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
-  const navigate        = useNavigate();
-  const { user }        = useAuth();
-  const createAccount   = useCreateAccount();
-  const upsertBudget    = useUpsertBudget();
-  const createCategory  = useCreateCategory();
-  const updateProfile   = useUpdateProfile();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const createAccount = useCreateAccount();
+  const upsertBudget = useUpsertBudget();
+  const createCategory = useCreateCategory();
+  const updateProfile = useUpdateProfile();
   const { data: profile, isLoading: profileLoading } = useProfile();
 
   // Guard: if already completed setup, skip to dashboard
@@ -54,9 +52,9 @@ export default function OnboardingPage() {
   }, [profile, profileLoading, navigate]);
 
   const steps = [
-    { title: "Welcome",    icon: GraduationCap },
-    { title: "Balances",   icon: Wallet },
-    { title: "Budget",     icon: PiggyBank },
+    { title: "Welcome", icon: GraduationCap },
+    { title: "Balances", icon: Wallet },
+    { title: "Budget", icon: PiggyBank },
     { title: "Categories", icon: Tag },
   ];
 
@@ -73,7 +71,7 @@ export default function OnboardingPage() {
       // Create accounts — first one is default
       const accounts = [
         { name: "Cash", type: "cash" as const, balance: parseFloat(cashBalance) || 0, is_default: true },
-        { name: "UPI",  type: "upi"  as const, balance: parseFloat(upiBalance)  || 0 },
+        { name: "UPI", type: "upi" as const, balance: parseFloat(upiBalance) || 0 },
         { name: "Card", type: "card" as const, balance: parseFloat(cardBalance) || 0 },
       ];
       for (const acc of accounts) {
@@ -125,9 +123,8 @@ export default function OnboardingPage() {
             {steps.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 flex-1 rounded-full transition-colors duration-300 ${
-                  i <= step ? "gradient-primary" : "bg-muted"
-                }`}
+                className={`h-2 flex-1 rounded-full transition-colors duration-300 ${i <= step ? "gradient-primary" : "bg-muted"
+                  }`}
               />
             ))}
           </div>
@@ -198,11 +195,10 @@ export default function OnboardingPage() {
                     key={cat.name}
                     onClick={() => toggleCategory(cat.name)}
                     style={selectedCategories.includes(cat.name) ? { background: cat.color } : undefined}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                      selectedCategories.includes(cat.name)
-                        ? "text-white border-transparent shadow-sm scale-105"
-                        : "bg-background text-foreground border-border hover:bg-accent"
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${selectedCategories.includes(cat.name)
+                      ? "text-white border-transparent shadow-sm scale-105"
+                      : "bg-background text-foreground border-border hover:bg-accent"
+                      }`}
                   >
                     {selectedCategories.includes(cat.name) && <Check className="h-3 w-3 inline mr-1" />}
                     {cat.name}

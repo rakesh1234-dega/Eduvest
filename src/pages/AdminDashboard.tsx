@@ -70,7 +70,7 @@ export default function AdminDashboardPage() {
     const { data: actData } = await supabase
       .from("activity_logs")
       .select("*")
-      .eq("user_id", user.user_id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20);
     setDetailActivity(actData || []);

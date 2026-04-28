@@ -50,6 +50,38 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string
+          activity_type: string
+          points_awarded: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          activity_type: string
+          points_awarded?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          activity_type?: string
+          points_awarded?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       budgets: {
         Row: {
           alert_threshold: number

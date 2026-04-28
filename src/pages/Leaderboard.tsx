@@ -160,8 +160,8 @@ export default function LeaderboardPage() {
           <p className="text-sm font-medium text-muted-foreground mt-1">Challenge top players ranked by engagement and consistency.</p>
         </div>
 
-        <div className="overflow-x-auto mt-2">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto mt-2 -mx-2 px-2">
+          <table className="w-full text-sm min-w-[500px]">
             <thead className="bg-muted/40 border-b border-border/60">
               <tr>
                 <th className="py-4 px-6 text-left font-bold text-muted-foreground uppercase tracking-wider text-[11px]">Rank</th>

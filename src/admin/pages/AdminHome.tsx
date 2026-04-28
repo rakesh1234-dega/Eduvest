@@ -91,7 +91,7 @@ export default function AdminHome() {
             {activities.length === 0 ? (
               <p className="text-sm text-muted-foreground p-5">No activity recorded yet.</p>
             ) : activities.slice(0, 6).map((a) => {
-              const user = users.find(u => u.user_id === a.user_id);
+              const user = users.find(u => u.id === a.user_id);
               return (
                 <div key={a.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
                   <div className="flex items-center gap-3">

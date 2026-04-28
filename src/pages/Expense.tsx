@@ -193,8 +193,8 @@ export default function ExpensePage() {
                     className={cn("flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border",
                       txType === t
                         ? t === "expense" ? "bg-rose-500 text-white border-rose-500 shadow-md"
-                        : t === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-md"
-                        : "bg-blue-500 text-white border-blue-500 shadow-md"
+                          : t === "income" ? "bg-emerald-500 text-white border-emerald-500 shadow-md"
+                            : "bg-blue-500 text-white border-blue-500 shadow-md"
                         : "bg-muted text-muted-foreground border-border hover:bg-accent"
                     )}>
                     {t === "expense" ? "💸 Expense" : t === "income" ? "💰 Income" : "🔄 Transfer"}
@@ -243,8 +243,8 @@ export default function ExpensePage() {
               <Button onClick={handleCreateTx} disabled={createTx.isPending}
                 className={cn("w-full h-12 rounded-xl font-bold text-base gap-2 shadow-md transition-all",
                   txType === "expense" ? "bg-rose-500 hover:bg-rose-600 text-white"
-                  : txType === "income" ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
+                    : txType === "income" ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                      : "bg-blue-500 hover:bg-blue-600 text-white"
                 )}>
                 <Plus className="h-5 w-5" />
                 {createTx.isPending ? "Adding..." : txType === "expense" ? "Log Expense" : txType === "income" ? "Log Income" : "Transfer"}
@@ -267,8 +267,8 @@ export default function ExpensePage() {
                           tx.type === "income" ? "bg-emerald-50 dark:bg-emerald-900/30" : tx.type === "expense" ? "bg-rose-50 dark:bg-rose-900/30" : "bg-blue-50 dark:bg-blue-900/30"
                         )}>
                           {tx.type === "income" ? <ArrowUpRight className="h-4 w-4 text-emerald-500" /> :
-                           tx.type === "expense" ? <ArrowDownRight className="h-4 w-4 text-rose-500" /> :
-                           <ArrowLeftRight className="h-4 w-4 text-blue-500" />}
+                            tx.type === "expense" ? <ArrowDownRight className="h-4 w-4 text-rose-500" /> :
+                              <ArrowLeftRight className="h-4 w-4 text-blue-500" />}
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-foreground">{tx.description || tx.type}</p>

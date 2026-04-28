@@ -29,7 +29,7 @@ export default function AdminUsers() {
     setDetailLoading(true);
     const [tx, act] = await Promise.all([
       supabase.from("transactions").select("*, categories(name), accounts(name)").eq("user_id", user.user_id).order("date", { ascending: false }).limit(15),
-      supabase.from("activity_logs").select("*").eq("user_id", user.user_id).order("created_at", { ascending: false }).limit(15),
+      supabase.from("activity_logs").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(15),
     ]);
     setDetailTx(tx.data || []);
     setDetailActivity(act.data || []);
@@ -42,6 +42,37 @@ export default function AdminUsers() {
     toast.success(`${user.display_name} is now ${newRole}`);
     fetchUsers();
     if (detailUser?.id === user.id) setDetailUser({ ...detailUser, role: newRole });
+  };
+
+  const deleteUser = async (user: any) => {
+    if (!confirm(`Are you sure you want to permanently delete ALL data for ${user.display_name}? This action cannot be undone.`)) return;
+    
+    setDetailLoading(true);
+    try {
+      const uId = user.user_id; // Clerk ID
+      const pId = user.id; // Profile UUID
+
+      await Promise.all([
+        supabase.from("transactions").delete().eq("user_id", uId),
+        supabase.from("budgets").delete().eq("user_id", uId),
+        supabase.from("categories").delete().eq("user_id", uId),
+        supabase.from("accounts").delete().eq("user_id", uId),
+        supabase.from("schedules").delete().eq("user_id", uId),
+        supabase.from("notifications").delete().eq("user_id", uId),
+        supabase.from("activity_logs").delete().eq("user_id", pId),
+        supabase.from("messages").delete().eq("sender_id", pId),
+        supabase.from("messages").delete().eq("recipient_id", pId),
+      ]);
+
+      await supabase.from("profiles").delete().eq("id", pId);
+
+      toast.success("User data completely deleted");
+      setDetailUser(null);
+      fetchUsers();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to delete user");
+      setDetailLoading(false);
+    }
   };
 
   const filtered = users.filter(u => {
@@ -139,6 +170,9 @@ export default function AdminUsers() {
             <div className="p-4 border-b border-slate-800 flex gap-2">
               <button onClick={() => toggleRole(detailUser)} className={cn("flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors", detailUser.role === "admin" ? "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20" : "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20")}>
                 <Shield className="h-4 w-4 inline mr-1" /> {detailUser.role === "admin" ? "Remove Admin" : "Make Admin"}
+              </button>
+              <button onClick={() => deleteUser(detailUser)} className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors bg-red-500/10 text-red-400 hover:bg-red-500/20">
+                <X className="h-4 w-4 inline mr-1" /> Delete Data
               </button>
             </div>
 

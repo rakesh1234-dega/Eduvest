@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/utils/auth";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const features = [
   { icon: Smartphone, title: "Smart Expense Tracking", desc: "Track every rupee across Cash, UPI, and Card in real-time.", gradient: "icon-bg-purple", color: "text-violet-600" },
@@ -102,16 +103,46 @@ const AnimatedStatCard = ({ label, targetValue, prefix, suffix, percent, delay, 
   );
 };
 
-const animatedStatsData = [
-  { label: "student users", targetValue: 10000, prefix: "", suffix: "+", percent: 85, delay: 0 },
-  { label: "expenses tracked", targetValue: 5, prefix: "₹", suffix: " Crore+", percent: 78, delay: 200 },
-  { label: "improved savings", targetValue: 95, prefix: "", suffix: "%", percent: 95, delay: 400 },
-];
-
 export default function LandingPage() {
   const { user, loading } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [statsRef, statsInView] = useInView({ threshold: 0.2 });
+  
+  const [realStats, setRealStats] = useState({
+    users: 0,
+    expenses: 0,
+    savings: 0,
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [profilesRes, expRes, incRes] = await Promise.all([
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("transactions").select("amount").eq("type", "expense"),
+          supabase.from("transactions").select("amount").eq("type", "income")
+        ]);
+
+        const totalExp = expRes.data?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
+        const totalInc = incRes.data?.reduce((sum, tx) => sum + Number(tx.amount), 0) || 0;
+
+        setRealStats({
+          users: profilesRes.count || 0,
+          expenses: totalExp,
+          savings: Math.max(0, totalInc - totalExp),
+        });
+      } catch (error) {
+        console.error("Error fetching landing stats:", error);
+      }
+    }
+    fetchStats();
+  }, []);
+
+  const animatedStatsData = [
+    { label: "student users", targetValue: realStats.users, prefix: "", suffix: "", percent: 85, delay: 0 },
+    { label: "expenses tracked", targetValue: realStats.expenses, prefix: "₹", suffix: "", percent: 78, delay: 200 },
+    { label: "improved savings", targetValue: realStats.savings, prefix: "₹", suffix: "", percent: 95, delay: 400 },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {

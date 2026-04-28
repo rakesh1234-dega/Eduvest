@@ -10,25 +10,26 @@ import { useProfile } from "@/hooks/use-profile";
 import { useUser } from "@clerk/clerk-react";
 
 const navItems = [
-  { title: "Dashboard",        url: "/dashboard",         icon: LayoutDashboard, adminOnly: false },
-  { title: "Schedule",         url: "/schedule",          icon: CalendarDays,    adminOnly: false },
-  { title: "Leaderboard",      url: "/leaderboard",       icon: Trophy,          adminOnly: false },
-  { title: "Expense",          url: "/expense",           icon: ClipboardList,   adminOnly: false },
-  { title: "Accounts",         url: "/accounts",          icon: Wallet,          adminOnly: false },
-  { title: "Transactions",     url: "/transactions",      icon: ArrowLeftRight,  adminOnly: false },
-  { title: "Budget",           url: "/budget",            icon: PiggyBank,       adminOnly: false },
-  { title: "Analytics",        url: "/analytics",         icon: BarChart3,       adminOnly: false },
-  { title: "Inbox",            url: "/inbox",             icon: Mail,            adminOnly: false },
-  { title: "Settings",         url: "/settings",          icon: Settings,        adminOnly: false },
-  { title: "Admin Portal",     url: "/admin-login",       icon: Shield,          adminOnly: true },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, adminOnly: false },
+  { title: "Schedule", url: "/schedule", icon: CalendarDays, adminOnly: false },
+  { title: "Leaderboard", url: "/leaderboard", icon: Trophy, adminOnly: false },
+  { title: "Expense", url: "/expense", icon: ClipboardList, adminOnly: false },
+  { title: "Accounts", url: "/accounts", icon: Wallet, adminOnly: false },
+  { title: "Transactions", url: "/transactions", icon: ArrowLeftRight, adminOnly: false },
+  { title: "Budget", url: "/budget", icon: PiggyBank, adminOnly: false },
+  { title: "Analytics", url: "/analytics", icon: BarChart3, adminOnly: false },
+  { title: "Inbox", url: "/inbox", icon: Mail, adminOnly: false },
+  { title: "Settings", url: "/settings", icon: Settings, adminOnly: false },
+  { title: "Admin Portal", url: "/admin-login", icon: Shield, adminOnly: true },
 ];
 
 interface AppSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  className?: string;
 }
 
-export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
+export function AppSidebar({ collapsed, onToggle, className }: AppSidebarProps) {
   const location = useLocation();
   const { data: profile } = useProfile();
   const { user } = useUser();
@@ -49,8 +50,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "min-h-screen flex flex-col bg-card border-r border-border shrink-0 transition-all duration-300 ease-in-out sticky top-0 h-screen overflow-y-auto",
-        collapsed ? "w-[68px]" : "w-60"
+        "min-h-screen flex flex-col bg-card border-r border-border shrink-0 transition-all duration-300 ease-in-out sticky top-0 h-screen overflow-y-auto z-40",
+        collapsed ? "w-[68px]" : "w-60",
+        className
       )}
     >
       {/* Logo */}
@@ -93,7 +95,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         )}
         {navItems.map((item) => {
           if (item.adminOnly && profile?.role !== "admin" && !isAdminEmail) return null;
-          
+
           const active = isActive(item.url);
           return (
             <NavLink
@@ -119,9 +121,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               </span>
               {!collapsed && (
                 <>
-                  <span className="whitespace-nowrap">{item.title}</span>
+                  <span className="text-foreground font-medium">{item.title}</span>
                   {active && (
-                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
                   )}
                 </>
               )}

@@ -93,10 +93,10 @@ export function useAddPoints() {
     mutationFn: async ({ points, activityName }: { points: number; activityName: string }) => {
       if (!user) throw new Error("Not authenticated");
 
-      // Fetch current points
+      // Fetch current points and id
       const { data: profile } = await supabase
         .from("profiles")
-        .select("points, level")
+        .select("id, points, level")
         .eq("user_id", user.id)
         .single();
       
@@ -109,15 +109,17 @@ export function useAddPoints() {
         .update({ points: newPoints, level: newLevel })
         .eq("user_id", user.id);
 
-      // Log activity
-      await supabase
-        .from("activity_logs")
-        .insert({
-          user_id: user.id,
-          activity_type: activityName,
-          points_awarded: points,
-        })
-        .select();
+      // Log activity using the profile UUID
+      if (profile?.id) {
+        await supabase
+          .from("activity_logs")
+          .insert({
+            user_id: profile.id,
+            activity_type: activityName,
+            points_awarded: points,
+          })
+          .select();
+      }
 
       return newPoints;
     },

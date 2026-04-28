@@ -24,9 +24,9 @@ import type { Database } from "@/integrations/supabase/types";
 type TxType = Database["public"]["Enums"]["transaction_type"];
 
 const TYPE_CONFIG = {
-  income:   { icon: ArrowUpRight,   iconBg: "bg-emerald-50", iconColor: "text-emerald-600", badge: "badge-income",   label: "Income"   },
-  expense:  { icon: ArrowDownRight, iconBg: "bg-rose-50",    iconColor: "text-rose-500",    badge: "badge-expense",  label: "Expense"  },
-  transfer: { icon: ArrowLeftRight, iconBg: "bg-blue-50",    iconColor: "text-blue-500",    badge: "badge-transfer", label: "Transfer" },
+  income: { icon: ArrowUpRight, iconBg: "bg-emerald-50", iconColor: "text-emerald-600", badge: "badge-income", label: "Income" },
+  expense: { icon: ArrowDownRight, iconBg: "bg-rose-50", iconColor: "text-rose-500", badge: "badge-expense", label: "Expense" },
+  transfer: { icon: ArrowLeftRight, iconBg: "bg-blue-50", iconColor: "text-blue-500", badge: "badge-transfer", label: "Transfer" },
 };
 
 export default function TransactionsPage() {
@@ -60,7 +60,7 @@ export default function TransactionsPage() {
       category_id: categoryId || undefined,
     });
     setOpen(false); setAmount(""); setDescription(""); setCategoryId("");
-    
+
     // Gamification Celebration
     import("canvas-confetti").then((module) => {
       const confetti = module.default;
@@ -87,7 +87,7 @@ export default function TransactionsPage() {
   };
 
   // Quick stats
-  const totalIncome  = transactions?.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0) || 0;
+  const totalIncome = transactions?.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + t.amount, 0) || 0;
   const totalExpense = transactions?.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + t.amount, 0) || 0;
 
   if (isLoading) return (
@@ -137,8 +137,8 @@ export default function TransactionsPage() {
               </DialogHeader>
               <Tabs value={txType} onValueChange={(v) => setTxType(v as TxType)}>
                 <TabsList className="w-full rounded-xl bg-muted p-1">
-                  <TabsTrigger value="income"   className="flex-1 rounded-lg text-xs font-medium">Income</TabsTrigger>
-                  <TabsTrigger value="expense"  className="flex-1 rounded-lg text-xs font-medium">Expense</TabsTrigger>
+                  <TabsTrigger value="income" className="flex-1 rounded-lg text-xs font-medium">Income</TabsTrigger>
+                  <TabsTrigger value="expense" className="flex-1 rounded-lg text-xs font-medium">Expense</TabsTrigger>
                   <TabsTrigger value="transfer" className="flex-1 rounded-lg text-xs font-medium">Transfer</TabsTrigger>
                 </TabsList>
               </Tabs>

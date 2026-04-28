@@ -54,7 +54,7 @@ export default function AdminActivity() {
       <div className="flex items-center gap-3 flex-wrap">
         <select value={filterUser} onChange={e => setFilterUser(e.target.value)} className="h-10 bg-slate-900 border border-slate-700 rounded-xl px-3 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 min-w-[160px]">
           <option value="">All Users</option>
-          {users.map(u => <option key={u.user_id} value={u.user_id}>{u.display_name || "Unknown"}</option>)}
+          {users.map(u => <option key={u.id} value={u.id}>{u.display_name || "Unknown"}</option>)}
         </select>
         {ACTIVITY_TYPES.map(t => (
           <button key={t} onClick={() => setFilterType(t)} className={cn("px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-colors", filterType === t ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700")}>{t === "all" ? "All" : t.replace(/_/g, " ")}</button>
@@ -66,7 +66,7 @@ export default function AdminActivity() {
         {loading ? <p className="p-8 text-center text-muted-foreground">Loading...</p> : filtered.length === 0 ? <p className="p-8 text-center text-muted-foreground">No activity found.</p> : (
           <div className="divide-y divide-slate-800">
             {filtered.map(a => {
-              const user = users.find(u => u.user_id === a.user_id);
+              const user = users.find(u => u.id === a.user_id);
               const tc = typeColors[a.activity_type] || "bg-slate-500/10 text-slate-400 border-slate-500/20";
               return (
                 <div key={a.id} className="px-5 py-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">

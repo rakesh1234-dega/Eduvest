@@ -120,11 +120,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      
+
       {/* ── Top Actions ── */}
       <div className="flex justify-end mb-2">
         {/* PDF Export Button */}
-        <Button 
+        <Button
           className="bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-sm"
           onClick={() => generateMonthlyPDF(profile, transactions, accounts, budget)}
           disabled={!transactions || transactions.length === 0}
@@ -175,9 +175,9 @@ export default function DashboardPage() {
       {/* ── Row 2: Account mini cards ── */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Cash",       value: stats?.cashBalance || 0, icon: Banknote,   bg: "icon-bg-green",  color: "text-emerald-700" },
-          { label: "UPI",        value: stats?.upiBalance || 0,  icon: Smartphone, bg: "icon-bg-blue",   color: "text-blue-700"   },
-          { label: "Card",       value: stats?.cardBalance || 0, icon: CreditCard, bg: "icon-bg-purple",  color: "text-violet-700" },
+          { label: "Cash", value: stats?.cashBalance || 0, icon: Banknote, bg: "icon-bg-green", color: "text-emerald-700" },
+          { label: "UPI", value: stats?.upiBalance || 0, icon: Smartphone, bg: "icon-bg-blue", color: "text-blue-700" },
+          { label: "Card", value: stats?.cardBalance || 0, icon: CreditCard, bg: "icon-bg-purple", color: "text-violet-700" },
         ].map(({ label, value, icon: Icon, bg, color }) => (
           <div key={label} className="bg-card rounded-2xl border border-border p-4 card-hover flex items-center gap-4">
             <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", bg)}>
@@ -220,7 +220,7 @@ export default function DashboardPage() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                     <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
-                    <YAxis tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                    <YAxis tick={{ fontSize: 12, fill: "#64748b", fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
                     <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} />
                     <Area type="monotone" name="Income" dataKey="income" stroke="#10b981" strokeWidth={3} fill="url(#colorIncome)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }} />
                     <Area type="monotone" name="Expense" dataKey="expense" stroke="#f43f5e" strokeWidth={3} fill="url(#colorExpense)" dot={{ r: 4, strokeWidth: 2, fill: "#fff" }} activeDot={{ r: 6, strokeWidth: 0, fill: "#f43f5e" }} />
@@ -298,12 +298,12 @@ export default function DashboardPage() {
                 <div className="relative h-48 w-full mb-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie 
-                        data={stats.categoryData} 
-                        dataKey="value" 
+                      <Pie
+                        data={stats.categoryData}
+                        dataKey="value"
                         nameKey="name"
-                        cx="50%" cy="50%" 
-                        innerRadius={55} 
+                        cx="50%" cy="50%"
+                        innerRadius={55}
                         outerRadius={75}
                         paddingAngle={3}
                         stroke="none"
@@ -375,8 +375,8 @@ export default function DashboardPage() {
                           {tx.type === "income"
                             ? <ArrowUpRight className="h-3.5 w-3.5 text-emerald-600" />
                             : tx.type === "expense"
-                            ? <ArrowDownRight className="h-3.5 w-3.5 text-rose-500" />
-                            : <ArrowLeftRight className="h-3.5 w-3.5 text-blue-500" />}
+                              ? <ArrowDownRight className="h-3.5 w-3.5 text-rose-500" />
+                              : <ArrowLeftRight className="h-3.5 w-3.5 text-blue-500" />}
                         </div>
                         <span className="font-medium text-foreground truncate max-w-[120px]">
                           {tx.description || tx.categories?.name || tx.type}

@@ -323,9 +323,9 @@ export function TransactionTable({ transactions, isLoading, headerAction }: { tr
                   <TableCell className="text-center hidden sm:table-cell">
                     <Badge variant="outline" className={cn(
                       "capitalize text-[10px]",
-                      tx.type === "expense" ? "text-rose-600 border-rose-200 bg-rose-50" : 
-                      tx.type === "income" ? "text-emerald-600 border-emerald-200 bg-emerald-50" : 
-                      "text-blue-600 border-blue-200 bg-blue-50"
+                      tx.type === "expense" ? "text-rose-600 border-rose-200 bg-rose-50" :
+                        tx.type === "income" ? "text-emerald-600 border-emerald-200 bg-emerald-50" :
+                          "text-blue-600 border-blue-200 bg-blue-50"
                     )}>
                       {tx.type}
                     </Badge>

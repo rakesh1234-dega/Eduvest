@@ -1,4 +1,4 @@
-import { useState } from "react";
+  import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminAuth } from "./AdminAuthContext";
 import { ShieldCheck, Eye, EyeOff, AlertCircle, Lock } from "lucide-react";
@@ -12,8 +12,13 @@ export default function AdminLoginPage() {
   const { adminLogin, isAdminLoggedIn } = useAdminAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (isAdminLoggedIn) {
+      navigate("/admin", { replace: true });
+    }
+  }, [isAdminLoggedIn, navigate]);
+
   if (isAdminLoggedIn) {
-    navigate("/admin", { replace: true });
     return null;
   }
 

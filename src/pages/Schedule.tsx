@@ -294,7 +294,7 @@ export default function SchedulePage() {
       {weekSchedule && !isEditing && (
         <div className="space-y-8">
           {/* Week Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
             {weekSchedule.days.map((day) => {
               const isToday = day.date === todayStr;
               const isPast = day.date < todayStr;
