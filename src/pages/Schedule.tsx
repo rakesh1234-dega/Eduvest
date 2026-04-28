@@ -10,14 +10,17 @@ import { cn } from "@/utils/utils";
 import { useAuth } from "@/utils/auth";
 
 import {
-  RoutineInput, WeekSchedule, DaySchedule, DEFAULT_ROUTINE, CATEGORY_COLORS 
+  RoutineInput, WeekSchedule, DaySchedule, ScheduleBlock, DEFAULT_ROUTINE, CATEGORY_COLORS 
 } from "@/utils/schedule-types";
 import {
   generateWeekSchedule, getWeekSchedule, saveWeekSchedule,
-  getRoutineInput, saveRoutineInput, toggleBlockCompletion,
+  getRoutineInput, saveRoutineInput, toggleBlockCompletion, verifyBlockCompletion,
   syncScheduleFromCloud
 } from "@/utils/schedule-rules";
 import { useAddPoints } from "@/hooks/use-profile";
+import { VerificationModal } from "@/components/Schedule/VerificationModal";
+import { useAccounts } from "@/hooks/use-accounts";
+import { useCreateTransaction } from "@/hooks/use-transactions";
 
 const DAY_TYPE_STYLES: Record<string, string> = {
   "Focus Day":    "bg-indigo-50 text-indigo-700 border-indigo-200",
@@ -38,8 +41,11 @@ export default function SchedulePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [verificationBlock, setVerificationBlock] = useState<{ date: string, index: number, block: ScheduleBlock } | null>(null);
   
   const addPoints = useAddPoints();
+  const { data: accounts } = useAccounts();
+  const createTransaction = useCreateTransaction();
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
@@ -85,23 +91,56 @@ export default function SchedulePage() {
     }
   };
 
+  const updateScheduleState = (date: string, updatedDay: DaySchedule | null) => {
+    if (!updatedDay || !weekSchedule) return;
+    const allCompleted = updatedDay.blocks.every(b => b.completed);
+    const previouslyAllCompleted = weekSchedule.days.find(d => d.date === date)?.blocks.every(b => b.completed);
+    
+    const newWeek = {
+      ...weekSchedule,
+      days: weekSchedule.days.map(d => d.date === date ? updatedDay : d)
+    };
+    setWeekSchedule(newWeek);
+    
+    if (allCompleted && !previouslyAllCompleted) {
+      toast.success("Perfect Day! 🎉", { description: "+15 Points awarded for finishing all tasks." });
+      addPoints.mutate({ points: 15, activityName: "Completed Daily Schedule" });
+    }
+  };
+
   const handleToggleBlock = (date: string, blockIdx: number) => {
     if (!weekSchedule) return;
-    const updatedDay = toggleBlockCompletion(date, blockIdx, userId);
-    
-    if (updatedDay) {
-      const allCompleted = updatedDay.blocks.every(b => b.completed);
-      const previouslyAllCompleted = weekSchedule.days.find(d => d.date === date)?.blocks.every(b => b.completed);
-      
-      const newWeek = {
-        ...weekSchedule,
-        days: weekSchedule.days.map(d => d.date === date ? updatedDay : d)
-      };
-      setWeekSchedule(newWeek);
-      
-      if (allCompleted && !previouslyAllCompleted) {
-        toast.success("Perfect Day! 🎉", { description: "+15 Points awarded for finishing all tasks." });
-        addPoints.mutate({ points: 15, activityName: "Completed Daily Schedule" });
+    const day = weekSchedule.days.find(d => d.date === date);
+    if (!day) return;
+    const block = day.blocks[blockIdx];
+
+    if (!block.completed) {
+      setVerificationBlock({ date, index: blockIdx, block });
+    } else {
+      const updatedDay = toggleBlockCompletion(date, blockIdx, userId);
+      updateScheduleState(date, updatedDay);
+    }
+  };
+
+  const handleVerify = async (data: { actualCost?: number, verificationNote?: string }) => {
+    if (!verificationBlock || !weekSchedule) return;
+    const { date, index, block } = verificationBlock;
+
+    const updatedDay = verifyBlockCompletion(date, index, data, userId);
+    updateScheduleState(date, updatedDay);
+
+    if (data.actualCost && data.actualCost > 0 && accounts && accounts.length > 0) {
+      const defaultAccount = accounts.find(a => a.is_default) || accounts[0];
+      try {
+        await createTransaction.mutateAsync({
+          type: "expense",
+          amount: data.actualCost,
+          account_id: defaultAccount.id,
+          description: block.activity,
+          date: todayStr,
+        });
+      } catch (e) {
+        console.error("Failed to create expense transaction", e);
       }
     }
   };
@@ -383,9 +422,21 @@ export default function SchedulePage() {
                                 )}>
                                   {block.category}
                                 </span>
-                                {block.cost > 0 && (
-                                  <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md border border-rose-100">
-                                    Cost: ₹{block.cost}
+                                {(block.cost > 0 || block.actualCost !== undefined) && (
+                                  <span className={cn(
+                                    "text-xs font-bold px-2 py-1 rounded-md border",
+                                    block.completed && block.actualCost !== undefined && block.actualCost > block.cost
+                                      ? "text-rose-600 bg-rose-50 border-rose-200"
+                                      : "text-slate-500 bg-slate-50 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
+                                  )}>
+                                    {block.completed && block.actualCost !== undefined 
+                                      ? `Spent: ₹${block.actualCost} / ₹${block.cost}`
+                                      : `Est: ₹${block.cost}`}
+                                  </span>
+                                )}
+                                {block.completed && block.verificationNote && (
+                                  <span className="text-[10px] text-muted-foreground truncate max-w-xs mt-1" title={block.verificationNote}>
+                                    "{block.verificationNote}"
                                   </span>
                                 )}
                               </div>
@@ -401,6 +452,13 @@ export default function SchedulePage() {
           )}
         </div>
       )}
+
+      <VerificationModal
+        isOpen={!!verificationBlock}
+        onClose={() => setVerificationBlock(null)}
+        onVerify={handleVerify}
+        block={verificationBlock?.block || null}
+      />
     </div>
   );
 }

@@ -34,6 +34,9 @@ export interface ScheduleBlock {
   icon: string;            // emoji
   cost: number;
   completed: boolean;
+  actualCost?: number;
+  verificationNote?: string;
+  completedAt?: string;
 }
 
 export type DayType = "Focus Day" | "Class Day" | "Balanced Day" | "Recovery Day" | "Revision Day" | "Flexible Day" | "Rest Day";

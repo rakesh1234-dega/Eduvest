@@ -202,6 +202,8 @@ export type Database = {
           role: string | null
           updated_at: string
           user_id: string
+          points: number | null
+          level: number | null
         }
         Insert: {
           avatar_url?: string | null
@@ -213,6 +215,8 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id: string
+          points?: number | null
+          level?: number | null
         }
         Update: {
           avatar_url?: string | null
@@ -224,6 +228,8 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+          points?: number | null
+          level?: number | null
         }
         Relationships: []
       }

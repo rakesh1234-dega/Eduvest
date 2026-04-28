@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { CalendarDays, ChevronRight, CheckCircle2, Settings2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/utils";
-import { getTodaySchedule, getCompletionPercent, toggleBlockCompletion, syncScheduleFromCloud } from "@/utils/schedule-rules";
+import { getTodaySchedule, getCompletionPercent, toggleBlockCompletion, verifyBlockCompletion, syncScheduleFromCloud } from "@/utils/schedule-rules";
 import { CATEGORY_COLORS } from "@/utils/schedule-types";
-import type { DaySchedule } from "@/utils/schedule-types";
+import type { DaySchedule, ScheduleBlock } from "@/utils/schedule-types";
+import { VerificationModal } from "./VerificationModal";
+import { useAccounts } from "@/hooks/use-accounts";
+import { useCreateTransaction } from "@/hooks/use-transactions";
 import { format } from "date-fns";
 import { useAuth } from "@/utils/auth";
 import { Loader2 } from "lucide-react";
@@ -23,9 +26,12 @@ const DAY_TYPE_STYLES: Record<string, string> = {
 export function ScheduleDashboardCard() {
   const [schedule, setSchedule] = useState<DaySchedule | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [verificationBlock, setVerificationBlock] = useState<{ index: number, block: ScheduleBlock } | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   const userId = user?.id;
+  const { data: accounts } = useAccounts();
+  const createTransaction = useCreateTransaction();
 
   const loadSchedule = () => {
     setSchedule(getTodaySchedule(userId));
@@ -51,8 +57,38 @@ export function ScheduleDashboardCard() {
 
   const handleToggle = (idx: number) => {
     if (!schedule) return;
-    const updated = toggleBlockCompletion(schedule.date, idx, userId);
-    if (updated) setSchedule({ ...updated });
+    const block = schedule.blocks[idx];
+    if (!block.completed) {
+      setVerificationBlock({ index: idx, block });
+    } else {
+      const updated = toggleBlockCompletion(schedule.date, idx, userId);
+      if (updated) setSchedule({ ...updated });
+    }
+  };
+
+  const handleVerify = async (data: { actualCost?: number, verificationNote?: string }) => {
+    if (!verificationBlock || !schedule) return;
+    const { index, block } = verificationBlock;
+
+    const updated = verifyBlockCompletion(schedule.date, index, data, userId);
+    if (updated) {
+      setSchedule({ ...updated });
+
+      if (data.actualCost && data.actualCost > 0 && accounts && accounts.length > 0) {
+        const defaultAccount = accounts.find(a => a.is_default) || accounts[0];
+        try {
+          await createTransaction.mutateAsync({
+            type: "expense",
+            amount: data.actualCost,
+            account_id: defaultAccount.id,
+            description: block.activity,
+            date: format(new Date(), "yyyy-MM-dd"),
+          });
+        } catch (e) {
+          console.error("Failed to create expense transaction", e);
+        }
+      }
+    }
   };
 
   const completionPct = schedule ? getCompletionPercent(schedule) : 0;
@@ -148,8 +184,15 @@ export function ScheduleDashboardCard() {
               <span>{block.icon}</span>
               <span className={block.completed ? "line-through" : ""}>{block.activity}</span>
             </span>
-            {block.cost > 0 && (
-              <span className="ml-auto text-xs font-semibold text-rose-500 shrink-0">₹{block.cost}</span>
+            {(block.cost > 0 || block.actualCost !== undefined) && (
+              <span className={cn(
+                "ml-auto text-[10px] font-semibold shrink-0 py-0.5 px-1.5 rounded-md",
+                block.completed && block.actualCost !== undefined && block.actualCost > block.cost
+                  ? "text-rose-600 bg-rose-50"
+                  : "text-slate-500 bg-slate-100 dark:bg-slate-800"
+              )}>
+                {block.completed && block.actualCost !== undefined ? `₹${block.actualCost} / ₹${block.cost}` : `₹${block.cost}`}
+              </span>
             )}
           </div>
         ))}
@@ -175,6 +218,13 @@ export function ScheduleDashboardCard() {
           View Full Schedule <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
         </Button>
       </div>
+
+      <VerificationModal
+        isOpen={!!verificationBlock}
+        onClose={() => setVerificationBlock(null)}
+        onVerify={handleVerify}
+        block={verificationBlock?.block || null}
+      />
     </div>
   );
 }

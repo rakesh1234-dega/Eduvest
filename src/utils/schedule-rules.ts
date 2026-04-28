@@ -289,7 +289,47 @@ export function toggleBlockCompletion(date: string, blockIndex: number, userId?:
     const week: WeekSchedule = JSON.parse(savedWeek);
     const day = week.days.find(d => d.date === date);
     if (!day || !day.blocks[blockIndex]) return null;
+    
     day.blocks[blockIndex].completed = !day.blocks[blockIndex].completed;
+    
+    // If un-completing, clear verification metadata
+    if (!day.blocks[blockIndex].completed) {
+      delete day.blocks[blockIndex].actualCost;
+      delete day.blocks[blockIndex].verificationNote;
+      delete day.blocks[blockIndex].completedAt;
+    } else {
+      day.blocks[blockIndex].completedAt = new Date().toISOString();
+    }
+    
+    saveWeekSchedule(week, userId);
+    return day;
+  } catch { return null; }
+}
+
+export function verifyBlockCompletion(
+  date: string, 
+  blockIndex: number, 
+  data: { actualCost?: number, verificationNote?: string },
+  userId?: string
+): DaySchedule | null {
+  const key = userId ? `eduvest_week_schedule_${userId}` : "eduvest_week_schedule";
+  const savedWeek = localStorage.getItem(key);
+  if (!savedWeek) return null;
+  try {
+    const week: WeekSchedule = JSON.parse(savedWeek);
+    const day = week.days.find(d => d.date === date);
+    if (!day || !day.blocks[blockIndex]) return null;
+    
+    day.blocks[blockIndex].completed = true;
+    day.blocks[blockIndex].completedAt = new Date().toISOString();
+    
+    if (data.actualCost !== undefined) {
+      day.blocks[blockIndex].actualCost = data.actualCost;
+    }
+    if (data.verificationNote !== undefined) {
+      day.blocks[blockIndex].verificationNote = data.verificationNote;
+    }
+    
     saveWeekSchedule(week, userId);
     return day;
   } catch { return null; }

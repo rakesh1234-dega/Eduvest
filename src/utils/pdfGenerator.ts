@@ -28,7 +28,7 @@ export function generateMonthlyPDF(
 
   const income = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const expense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-  
+
   autoTable(doc, {
     startY: 50,
     head: [["Metric", "Amount (INR)"]],
@@ -61,10 +61,10 @@ export function generateMonthlyPDF(
   doc.setFontSize(14);
   doc.setTextColor(30);
   doc.text("AI Insights & Suggestions", 14, aiStartY);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(80);
-  
+
   const insights = [];
   if (expense > (budget?.amount || income)) {
     insights.push("• You are currently exceeding your budget limit. Consider cutting down on non-essential categories.");
